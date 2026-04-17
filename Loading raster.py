@@ -1,13 +1,87 @@
-'''
-
 import matplotlib
 import pandas as pd
-import geopandas as gpd
+import glob
+from pathlib import Path
+import os
 from shapely.geometry import Point, LineString, Polygon
+import rasterio as rio
+import geopandas as gpd
 import matplotlib.pyplot as plt
 from rasterio.plot import show
 
-dataset = rasterio.open('C:/RS_GIS/EGM713/Assignment II/Data/Summer/Raw/LC08_L2SP_043034_20130815_20200912_02_T1/LC08_L2SP_043034_20130815_20200912_02_T1_SR_B6.TIF')
+parent = Path("C:/RS_GIS/EGM713/Assignment II/Data/Summer/Raw/")
+
+data = {}
+
+for subfolder in parent.iterdir():
+    if subfolder.is_dir():
+        files = [f.name for f in subfolder.iterdir() if f.is_file()]
+        data[subfolder.name] = files
+
+print(data)
+
+
+'''
+parent = Path("C:/RS_GIS/EGM713/Assignment II/Data/Summer/Raw/")
+
+rows = []
+
+for subfolder in parent.iterdir():
+    if subfolder.is_dir():
+        for f in subfolder.iterdir():
+            if f.is_file():
+                rows.append({
+                    "folder": subfolder.name,
+                    "file": f.name,
+                    "path": str(f)
+                })
+
+print(rows)
+# Example: convert to DataFrame
+import pandas as pd
+df = pd.DataFrame(rows)
+'''
+
+'''
+parent = Path("C:/RS_GIS/EGM713/Assignment II/Data/Summer/Raw/")
+
+data = {}
+
+for subfolder in parent.iterdir():
+    if subfolder.is_dir():
+        files = [f.name for f in subfolder.iterdir() if f.is_file()]
+        data[subfolder.name] = files
+
+print(data)
+'''
+
+
+
+
+#subfolders = []
+#\parent ='C:/RS_GIS/EGM713/Assignment II/Data/Summer/Raw/'
+#subfolders = os.listdir(parent)
+#for f in subfolders:
+#    print(f)
+#   # print(subfolders[f])
+#    band_files = glob.glob(os.path.join(parent,f, "*_SR_B*.TIF"))
+#    print(band_files)
+
+#print(type(subfolders))
+
+
+'''
+folder = 'C:/RS_GIS/EGM713/Assignment II/Data/Summer/Raw/LC08_L2SP_043034_20130815_20200912_02_T1/'
+band_files = glob.glob(os.path.join(folder, "*_SR_B*.TIF"))
+band_files.sort()
+
+print("Found files:")
+for f in band_files:
+    print(f)
+
+'''
+'''
+dataset = rio.open('C:/RS_GIS/EGM713/Assignment II/Data/Summer/Raw/LC08_L2SP_043034_20130815_20200912_02_T1/LC08_L2SP_043034_20130815_20200912_02_T1_SR_B6.TIF')
 boundary = gpd.read_file('C:/RS_GIS/EGM713/Assignment II/AOI/aoi.shp')
 
 # Match CRS
@@ -17,28 +91,6 @@ fig, ax = plt.subplots(figsize=(10, 10))
 show(dataset, ax=ax, cmap='pink')
 boundary.plot(ax=ax, facecolor='none', edgecolor='red', linewidth=2)
 plt.show()
-
-import tkinter as tk
-from tkinter import filedialog
-import glob
-import os
-
-# Hide the main tkinter window
-root = tk.Tk()
-root.withdraw()
-
-# Open folder selection dialog
-folder = filedialog.askdirectory(title="Select folder with band data")
-
-print("Selected folder:", folder)
-
-# Find all band files
-band_files = glob.glob(os.path.join(folder, "*_SR_B*.TIF"))
-band_files.sort()
-
-print("Found files:")
-for f in band_files:
-    print(f)
 '''
 '''
 def load_data():
@@ -66,9 +118,7 @@ def load_data():
 '''
 
 
-import tkinter as tk
-import tkinter.ttk as ttk
-from tkinter import filedialog
+'''
 import glob
 import os
 from datetime import datetime
@@ -76,13 +126,6 @@ import rasterio
 
 
 # Helper Functions
-def add_folder():
-    folder = filedialog.askdirectory(title="Select dataset folder")
-    if folder and folder not in folders:
-        folders.append(folder)
-        update_list()
-
-
 def add_parent_folder():
     parent = filedialog.askdirectory(title="Select parent folder")
 
@@ -91,23 +134,6 @@ def add_parent_folder():
 
     subfolders = [os.path.join(parent, f) for f in os.listdir(parent)
                   if os.path.isdir(os.path.join(parent, f))]
-
-    for folder in subfolders:
-        if folder not in folders:
-            folders.append(folder)
-
-    update_list()
-
-def remove_selected():
-    selected = listbox.curselection()
-    for i in reversed(selected):
-        folders.pop(i)
-    update_list()
-
-def update_list():
-    listbox.delete(0, tk.END)
-    for f in folders:
-        listbox.insert(tk.END, f)
 
 def dataset_info():
     global time_series
@@ -173,50 +199,5 @@ def get_band_role(satellite, band):
     return mapping.get(band, "UNKNOWN")
 
 folders = []
-
-# Main window
-root = tk.Tk()
-root.title("Dataset Manager")
-root.geometry("1000x700")
-
-# Layout frame
-frame = tk.Frame(root)
-frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
-
-# Listbox (shows selected folders)
-listbox = tk.Listbox(frame, selectmode=tk.MULTIPLE)
-listbox.pack(fill=tk.BOTH, expand=True)
-
-# Treeview table (dataset info)
-table = ttk.Treeview(root, columns=("satellite", "scene_id", "date", "band", "role", "filename"), show="headings")
-
-table.heading("satellite", text="Satellite")
-table.heading("scene_id", text="Scene ID")
-table.heading("date", text="Date")
-table.heading("band", text="Band")
-table.heading("role", text="Role")
-table.heading("filename", text="Filename")
-
-table.column("satellite", width=80)
-table.column("scene_id", width=80)
-table.column("date", width=80)
-table.column("band", width=100)
-table.column("role", width=60)
-table.column("filename", width=100)
-
-table.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
-
-
-# Buttons
-btn_frame = tk.Frame(root)
-btn_frame.pack(pady=5)
-
-tk.Button(btn_frame, text="Add Folder", command=add_folder).pack(side=tk.LEFT, padx=5)
-tk.Button(btn_frame, text="Add Parent Folder", command=add_parent_folder).pack(side=tk.LEFT, padx=5)
-tk.Button(btn_frame, text="Remove Selected", command=remove_selected).pack(side=tk.LEFT, padx=5)
-tk.Button(btn_frame, text="Data Set Info", command=dataset_info).pack(side=tk.LEFT, padx=5)
-#tk.Button(root, text="Load Data", command=load_data).pack(pady=5)
-
-root.mainloop()
-
 print("Final folders:", folders)
+'''
