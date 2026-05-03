@@ -3,10 +3,19 @@ channels:
   - conda-forge
   - defaults
 dependencies:
-  - python > 3.11
+  - python>=3.11  # Minimum requirement for earthaccess
+  - pip
+  - numpy
+  - pandas
+  - scipy
+  - earthaccess
   - geopandas
-  - cartopy
-  - notebook
   - rasterio
-  - pyepsg
-  - folium
+  - rasterstats
+  - rioxarray
+  - xarray
+  - xarray-spatial
+  - shapely
+  - matplotlib
+  - matplotlib-scalebar
+  - notebook
